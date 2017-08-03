@@ -3,5 +3,5 @@
 docker run \
     -d \
     --rm \
-    --name="weather-microservice" \
-    weather-microservice
+    --name="harmony-microservice" \
+    harmony-microservice
