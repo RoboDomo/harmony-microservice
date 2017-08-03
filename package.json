@@ -1,0 +1,34 @@
+{
+  "name": "harmony-microservice",
+  "version": "1.0.0",
+  "description": "autodomo microservice for Logitech Harmony Hubs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/autodomo/harmony-microservice.git"
+  },
+  "keywords": [
+    "autodomo",
+    "logitech",
+    "harmony",
+    "hub",
+    "home",
+    "automation",
+    "microservice"
+  ],
+  "author": "Michael Schwartz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/autodomo/harmony-microservice/issues"
+  },
+  "homepage": "https://github.com/autodomo/harmony-microservice#readme",
+  "dependencies": {
+    "debug": "^2.6.8",
+    "harmonyhubjs-client": "^1.1.10",
+    "microservice-core": "github:autodomo/microservice-core",
+    "parameterize": "0.0.7"
+  }
+}
