@@ -53,12 +53,16 @@ class HarmonyHost extends HostBase {
         this.client.on('connect', () => {
             this.client.subscribe(this.topic + '/command/#')
             this.client.subscribe(this.topic + '/device/#')
+            this.client.subscribe(this.topic + '/activity/#')
         })
         this.client.on('message', async (topic, message) => {
             message = message.toString()
             debug(this.topic, 'topic', topic, 'message', message)
             if (topic.endsWith('command')) {
                 Promise.resolve(await this.command(message))
+            }
+            else if (topic.endsWith('activity')) {
+                Promise.resolve(await this.startActivity(message))
             }
             const parts = topic.split('/')
             if (parts[2] === 'device') {
