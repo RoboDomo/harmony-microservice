@@ -55,7 +55,7 @@ class HarmonyHost extends HostBase {
         })
         this.client.on('message', async (topic, message) => {
             message = message.toString()
-            debug(this.topic, 'topic', topic, 'message', message)
+            debug(this.topic, 'topic', topic, 'message', message.substr(0, 32))
             if (topic.endsWith('command')) {
                 Promise.resolve(await this.command(message))
             }
