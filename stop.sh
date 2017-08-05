@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker stop weather-microservice
+docker stop harmony-microservice

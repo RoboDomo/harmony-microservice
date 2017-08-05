@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker run -it --rm --name weather-microservice weather-microservice /bin/bash
+docker run -it --rm --name harmony-microservice harmony-microservice /bin/bash

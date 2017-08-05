@@ -51,9 +51,7 @@ class HarmonyHost extends HostBase {
         this.ip     = config.ip
         this.mac    = config.mac
         this.client.on('connect', () => {
-            this.client.subscribe(this.topic + '/command/#')
-            this.client.subscribe(this.topic + '/device/#')
-            this.client.subscribe(this.topic + '/activity/#')
+            this.client.subscribe(this.topic + '/set/#')
         })
         this.client.on('message', async (topic, message) => {
             message = message.toString()
@@ -65,8 +63,8 @@ class HarmonyHost extends HostBase {
                 Promise.resolve(await this.startActivity(message))
             }
             const parts = topic.split('/')
-            if (parts[2] === 'device') {
-                this.deviceCommand(parts[3], message)
+            if (parts[3] === 'device') {
+                this.deviceCommand(parts[4], message)
 
             }
             else {

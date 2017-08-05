@@ -1,13 +1,13 @@
-# autelis-microservice
-MQTT  microservice for Autelis pool controller
+# harmony-microservice
+MQTT  microservice for Logitech Harmony Hubs
 
-This microservice polls the autelis device periodically for state changes and publishes these to MQTT.  It also listens for command messages via MQTT to turn on/off or set temperatures.
+This microservice controls one or more Logitech Harmony hubs.  Events and commands are bridged via MQTT.
 
 ## Docker build instructions
 You can neatly package this microservice as a Docker container:
 
 ```
-$ docker build -t autelis-microservice .
+$ docker build -t harmony-microservice .
 ```
 
 (There is a build.sh script that will do the build command for you)
@@ -20,15 +20,15 @@ To run it:
 $ docker run \
     -d \
     --rm \
-    --name="autelis-microservice"
-    autelis-microservice
+    --name="harmony-microservice"
+    harmony-microservice
 ```
 
 (There is a run.sh script that will do the run command for you)
 
 To restart it:
 ```
-$ docker restart autelis-micorservice
+$ docker restart harmony-micorservice
 ```
 
 ## Diagnosing Docker container
