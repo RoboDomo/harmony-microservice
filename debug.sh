@@ -4,4 +4,4 @@
 docker run \
     --rm \
     --name="harmony-microservice" \
-    autodomo/harmony-microservice
+    robodomo/harmony-microservice

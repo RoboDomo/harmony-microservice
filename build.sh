@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker build --no-cache -t autodomo/harmony-microservice .
+docker build --no-cache -t robodomo/harmony-microservice .
