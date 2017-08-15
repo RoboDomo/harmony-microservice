@@ -1,6 +1,6 @@
 // Harmony Microservice
 
-process.env.DEBUG = 'HarmonyHost,HostBase'
+process.env.DEBUG = 'HarmonyHost'
 
 const debug        = require('debug')('HarmonyHost'),
       Config       = require('./config'),
@@ -50,6 +50,7 @@ class HarmonyHost extends HostBase {
         this.device = config.device
         this.ip     = config.ip
         this.mac    = config.mac
+        this.state = { startingActivity: null}
         this.client.on('connect', () => {
             this.client.subscribe(this.topic + '/set/#')
         })
@@ -131,6 +132,20 @@ class HarmonyHost extends HostBase {
         return commands
     }
 
+    findActivity(activity) {
+        const activities = this.activities
+
+        if (activities[activity] || activities[String(activity)]) {
+            return activities
+        }
+        for (const key in Object.keys(activities)) {
+            if (activities[key].label === activities) {
+                return key
+            }
+        }
+        return null
+    }
+
     /**
      * Start an activity.
      *
@@ -140,6 +155,9 @@ class HarmonyHost extends HostBase {
      * @returns {Promise.<Promise|*|Q.Promise>}
      */
     async startActivity(activity) {
+        console.log('activity', activity)
+        activity = this.findActivity(activity)
+        console.log('activity after', activity)
         return new Promise(async (resolve, reject) => {
             try {
                 this.state = {startingActivity: activity}
@@ -167,6 +185,7 @@ class HarmonyHost extends HostBase {
                 this.state = {
                     isOff:             await this.harmonyClient.isOff(),
                     currentActivity:   currentActivity,
+                    startingActivity: startingActivity === currentActivity ? null : startingActivity,
                     // availableCommands: this.availableCommands,
                     // activities:        this.activities,
                     // devices:           this.devices
