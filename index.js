@@ -58,10 +58,10 @@ class HarmonyHost extends HostBase {
             message = message.toString()
             debug(this.topic, 'topic', topic, 'message', message.substr(0, 32))
             if (topic.endsWith('command')) {
-                Promise.resolve(await this.command(message))
+                return Promise.resolve(await this.command(message))
             }
             else if (topic.endsWith('activity')) {
-                Promise.resolve(await this.startActivity(message))
+                return Promise.resolve(await this.startActivity(message))
             }
             const parts = topic.split('/')
             if (parts[3] === 'device') {
@@ -133,17 +133,28 @@ class HarmonyHost extends HostBase {
     }
 
     findActivity(activity) {
-        const activities = this.activities
-
-        if (activities[activity] || activities[String(activity)]) {
-            return activities
-        }
-        for (const key in Object.keys(activities)) {
-            if (activities[key].label === activities) {
-                return key
+        debug('findActivity', activity)
+        try {
+            const activities = this.activities
+            if (!this.activities) {
+                return null
             }
+
+            if (activities[activity] || activities[String(activity)]) {
+                return activity
+            }
+            for (const key of Object.keys(activities)) {
+                const a = activities[key]
+                console.log('compare', key, a.label)
+                if (a.label === activity) {
+                    return key
+                }
+            }
+            return null
         }
-        return null
+        catch (e) {
+            return null
+        }
     }
 
     /**
@@ -157,6 +168,9 @@ class HarmonyHost extends HostBase {
     async startActivity(activity) {
         console.log('activity', activity)
         activity = this.findActivity(activity)
+        if (!activity) {
+            return
+        }
         console.log('activity after', activity)
         return new Promise(async (resolve, reject) => {
             try {
