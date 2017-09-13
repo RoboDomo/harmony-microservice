@@ -194,13 +194,15 @@ class HarmonyHost extends HostBase {
     while (true) {
       const startingActivity = this.state ? this.state.startingActivity : null,
             currentActivity  = await this.getCurrentActivity(),
-            newActivity = this.state.currentActivity !== currentActivity
+            newActivity = this.state.currentActivity !== currentActivity,
+            newStartingActivity = startingActivity === currentActivity ? null : startingActivity
+      
 
       try {
         this.state = {
           isOff:            await this.harmonyClient.isOff(),
           currentActivity:  currentActivity,
-          startingActivity: startingActivity === currentActivity ? null : startingActivity,
+          startingActivity: newStartingActivity,
           // availableCommands: this.availableCommands,
           // activities:        this.activities,
           // devices:           this.devices
