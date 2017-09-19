@@ -146,7 +146,6 @@ class HarmonyHost extends HostBase {
       }
       for (const key of Object.keys(activities)) {
         const a = activities[key]
-        console.log('compare', key, a.label)
         if (a.label === activity) {
           return key
         }
@@ -167,12 +166,12 @@ class HarmonyHost extends HostBase {
      * @returns {Promise.<Promise|*|Q.Promise>}
      */
   async startActivity(activity) {
-    console.log('activity', activity)
+    debug(this.device, 'activity', activity)
     activity = this.findActivity(activity)
     if (!activity) {
       return
     }
-    console.log('activity after', activity)
+    debug(this.device, 'activity after', activity)
     return new Promise(async (resolve, reject) => {
       try {
         this.state = {startingActivity: activity}
@@ -196,8 +195,10 @@ class HarmonyHost extends HostBase {
             currentActivity  = await this.getCurrentActivity(),
             newActivity = this.state.currentActivity !== currentActivity,
             newStartingActivity = startingActivity === currentActivity ? null : startingActivity
-      
 
+      if (startingActivity !== newStartingActivity) {
+        debug(this.device, 'poll', 'startingActivity', startingActivity, 'newStartingActivity', newStartingActivity)
+      }
       try {
         this.state = {
           isOff:            await this.harmonyClient.isOff(),
