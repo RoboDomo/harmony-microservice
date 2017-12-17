@@ -191,15 +191,15 @@ class HarmonyHost extends HostBase {
   async poll() {
     debug(this.device, 'poll')
     while (true) {
-      const startingActivity = this.state ? this.state.startingActivity : null,
-            currentActivity  = await this.getCurrentActivity(),
-            newActivity = this.state.currentActivity !== currentActivity,
-            newStartingActivity = startingActivity === currentActivity ? null : startingActivity
-
-      if (startingActivity !== newStartingActivity) {
-        debug(this.device, 'poll', 'startingActivity', startingActivity, 'newStartingActivity', newStartingActivity)
-      }
       try {
+        const startingActivity = this.state ? this.state.startingActivity : null,
+              currentActivity  = await this.getCurrentActivity(),
+              newActivity = this.state.currentActivity !== currentActivity,
+              newStartingActivity = startingActivity === currentActivity ? null : startingActivity
+
+        if (startingActivity !== newStartingActivity) {
+          debug(this.device, 'poll', 'startingActivity', startingActivity, 'newStartingActivity', newStartingActivity)
+        }
         this.state = {
           isOff:            await this.harmonyClient.isOff(),
           currentActivity:  currentActivity,
