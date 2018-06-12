@@ -295,7 +295,7 @@ class HarmonyHost extends HostBase {
     }
 
     return new Promise(async (resolve, reject) => {
-      const action = control.action.replace(/\:/g, '::')
+      const action = control.action.replace(/:/g, '::')
       // debug(this.device, 'command', command, 'control', control, 'action', action)
       try {
         await this.harmonyClient.send('holdAction', 'action=' + action + ':status=press')
