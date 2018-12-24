@@ -28,7 +28,7 @@
   "homepage": "https://github.com/robodomo/harmony-microservice#readme",
   "dependencies": {
     "debug": "^2.6.9",
-    "harmonyhubjs-client": "^1.1.10",
+    "harmonyhubjs-client": "github:RoboDomo/harmonyhubjs-client",
     "microservice-core": "github:robodomo/microservice-core",
     "parameterize": "0.0.7"
   }

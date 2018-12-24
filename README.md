@@ -3,6 +3,10 @@ MQTT  microservice for Logitech Harmony Hubs
 
 This microservice controls one or more Logitech Harmony hubs.  Events and commands are bridged via MQTT.
 
+*NOTE: Logitech updated the firmware (automatically) with a security fix that closes the xmpp port/functionality.
+See this URL for instrucitons how to flash your hub with a developer version of firmware that works* *
+https://community.logitech.com/s/question/0D55A00008D4bZ4SAJ/harmony-hub-firmware-update-fixes-vulnerabilities?t=1545438745727
+
 ## Docker build instructions
 You can neatly package this microservice as a Docker container:
 
