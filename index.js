@@ -52,34 +52,40 @@ class HarmonyHost extends HostBase {
     this.ip = config.ip;
     this.mac = config.mac;
     this.state = { startingActivity: null };
-    this.client.on("connect", () => {
+    this.client.on("connect", async () => {
       this.client.subscribe(this.topic + "/set/#");
     });
     this.client.on("message", async (topic, message) => {
-      message = message.toString();
-      debug(this.topic, "topic", topic, "message", message.substr(0, 32));
-      if (topic.endsWith("command")) {
-        return Promise.resolve(await this.command(message));
-      } else if (topic.endsWith("activity")) {
-        return Promise.resolve(await this.startActivity(message));
-      }
-      const parts = topic.split("/");
-      if (parts[3] === "device") {
-        this.deviceCommand(parts[4], message);
-      } else {
-        debug("invalid topic", topic);
+      try {
+        message = message.toString();
+        debug(this.topic, "topic", topic, "message", message.substr(0, 32));
+        if (topic.endsWith("command")) {
+          return Promise.resolve(await this.command(message));
+        } else if (topic.endsWith("activity")) {
+          return Promise.resolve(await this.startActivity(message));
+        }
+        const parts = topic.split("/");
+        if (parts[3] === "device") {
+          this.deviceCommand(parts[4], message);
+        } else {
+          debug("invalid topic", topic);
+        }
+      } catch (e) {
+        console.log("message exception", e.message, e.stack);
       }
     });
+    setTimeout(async () => {
+      await this.connect();
+    }, 1);
   }
 
   async connect() {
     return new Promise(async (resolve, reject) => {
       debug(this.device, "connecting");
       try {
-        this.harmonyClient = await harmony(this.ip, 8222);
-        console.log("got harmony");
+        this.harmonyClient = await harmony(this.ip);
         this.harmonyClient.on("error", async () => {
-          this.harmonyClient = await harmony(this.ip, 8222);
+          this.harmonyClient = await harmony(this.ip);
         });
         process.on("exit", () => {
           debug(this.device, "exit", "harmonyClient.end()");
@@ -90,14 +96,15 @@ class HarmonyHost extends HostBase {
           this.harmonyClient.end();
           process.exit();
         });
-        console.log("refreshing");
+        debug("refreshing");
         await this.refresh();
         this.state = {
           availableCommands: this.availableCommands,
           activities: this.activities,
           devices: this.devices
         };
-        console.log("state", this.state);
+        //        debug("state", this.state);
+        debug("polling");
         this.poll();
         resolve();
       } catch (e) {
@@ -135,7 +142,6 @@ class HarmonyHost extends HostBase {
   }
 
   findActivity(activity) {
-    debug("findActivity", activity);
     try {
       const activities = this.activities;
       if (!this.activities) {
@@ -166,12 +172,11 @@ class HarmonyHost extends HostBase {
    * @returns {Promise.<Promise|*|Q.Promise>}
    */
   async startActivity(activity) {
-    debug(this.device, "activity", activity);
+    //    debug(this.device, "startActivity", activity);
     activity = this.findActivity(activity);
     if (!activity) {
       return;
     }
-    debug(this.device, "activity after", activity);
     return new Promise(async (resolve, reject) => {
       try {
         this.state = { startingActivity: activity };
@@ -194,10 +199,14 @@ class HarmonyHost extends HostBase {
         const startingActivity = this.state
             ? this.state.startingActivity
             : null,
-          currentActivity = await this.getCurrentActivity(),
-          newActivity = this.state.currentActivity !== currentActivity,
-          newStartingActivity =
-            startingActivity === currentActivity ? null : startingActivity;
+          currentActivity = await this.getCurrentActivity();
+        let newStartingActivity = startingActivity,
+          newActivity = false;
+        if (startingActivity === currentActivity) {
+          newStartingActivity = null;
+          newActivity = true;
+        }
+        //            startingActivity === currentActivity ? null : currentActivity;
 
         if (startingActivity !== newStartingActivity) {
           debug(
@@ -270,7 +279,6 @@ class HarmonyHost extends HostBase {
       slugs = {};
     try {
       const commands = await this.harmonyClient.getAvailableCommands();
-      // debug(this.device, 'getAvailableCommands', commands)
       commands.device.forEach(device => {
         device.slug = parameterize(device.label);
         device.commands = getCommandsFromControlGroup(device.controlGroup);
@@ -296,6 +304,7 @@ class HarmonyHost extends HostBase {
       control = commands ? commands[command] : null;
 
     if (!control) {
+      debug("no control");
       debug(this.device, "command", command, control);
       return Promise.resolve(new Error("Invalid command " + command));
     }
@@ -320,6 +329,7 @@ class HarmonyHost extends HostBase {
   }
 
   findAction(device, slug) {
+    debug("findAction", slug, device.commands);
     if (!device) {
       return null;
     }
@@ -329,22 +339,22 @@ class HarmonyHost extends HostBase {
       return slugs[slug].action;
     }
 
-    const keys = Object.keys(slugs);
     let action = null;
-    keys.some(key => {
+    for (const key of Object.keys(slugs)) {
       if (slugs[key].name === slug) {
-        action = slugs[key].action;
-        return true;
+        return slugs[key].action;
       }
-    });
+    }
     return action;
   }
 
   async deviceCommand(deviceSlug, command) {
+    console.log("deviceCommand", deviceSlug, command);
+    //    console.log("deviceSlugs", this.devices);
     const device =
-        this.deviceSlugs[deviceSlug] ||
-        this.deviceSlugs[String(deviceSlug)] ||
-        this.deviceSlugs[Number(deviceSlug)],
+        this.devices[deviceSlug] ||
+        this.devices[String(deviceSlug)] ||
+        this.devices[Number(deviceSlug)],
       action = this.findAction(device, command);
 
     if (!action) {
@@ -378,16 +388,6 @@ const hubs = {};
 async function main() {
   Config.hubs.forEach(hub => {
     hubs[hub.device] = new HarmonyHost(hub);
-  });
-
-  Object.keys(hubs).forEach(async hub => {
-    try {
-      await hubs[hub].connect();
-    } catch (e) {
-      console.log("catch connect");
-      console.dir(hub);
-      console.dir(e);
-    }
   });
 }
 
