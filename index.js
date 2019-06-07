@@ -1,9 +1,10 @@
 // Harmony Microservice
 
+process.title = "harmony-microservice";
 process.env.DEBUG = "HarmonyHost";
 
 const debug = require("debug")("HarmonyHost"),
-  Config = require("./config"),
+  console = require("console"),
   HostBase = require("microservice-core/HostBase"),
   harmony = require("harmonyhubjs-client"),
   parameterize = require("parameterize");
@@ -349,8 +350,6 @@ class HarmonyHost extends HostBase {
   }
 
   async deviceCommand(deviceSlug, command) {
-    console.log("deviceCommand", deviceSlug, command);
-    //    console.log("deviceSlugs", this.devices);
     const device =
         this.devices[deviceSlug] ||
         this.devices[String(deviceSlug)] ||
@@ -386,7 +385,9 @@ class HarmonyHost extends HostBase {
 const hubs = {};
 
 async function main() {
-  Config.hubs.forEach(hub => {
+  const Config = await HarmonyHost.config();
+  console.dir(Config.harmony.hubs);
+  Config.harmony.hubs.forEach(hub => {
     hubs[hub.device] = new HarmonyHost(hub);
   });
 }
