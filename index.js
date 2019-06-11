@@ -1,7 +1,7 @@
 // Harmony Microservice
 
-process.title = "harmony-microservice";
 process.env.DEBUG = "HarmonyHost";
+process.title = process.env.TITLE || "harmony-microservice";
 
 const debug = require("debug")("HarmonyHost"),
   console = require("console"),
