@@ -8,7 +8,7 @@ const debug = require("debug")("HarmonyHost"),
   harmony = require("harmonyhubjs-client"),
   parameterize = require("parameterize");
 
-const mqttHost = process.env.MQTT_HOST || "mqtt://ha",
+const mqttHost = process.env.MQTT_HOST || "mqtt://mqtt",
   topicRoot = process.env.TOPIC_ROOT || "harmony";
 
 /**
