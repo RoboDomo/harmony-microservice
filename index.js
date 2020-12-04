@@ -29,15 +29,15 @@ const POLL_TIME = 100;
 function getCommandsFromControlGroup(controlGroup) {
   const deviceCommands = {};
 
-  controlGroup.some(function(group) {
-    group.function.some(function(func) {
+  controlGroup.some(function (group) {
+    group.function.some(function (func) {
       const slug = parameterize(func.label);
 
       deviceCommands[slug] = { name: func.name, slug: slug, label: func.label };
       Object.defineProperty(deviceCommands[slug], "action", {
         enumerable: false,
         writeable: true,
-        value: func.action.replace(/:/g, "::")
+        value: func.action.replace(/:/g, "::"),
       });
     });
   });
@@ -47,18 +47,32 @@ function getCommandsFromControlGroup(controlGroup) {
 class HarmonyHost extends HostBase {
   constructor(config) {
     super(mqttHost, topicRoot + "/" + config.device, true);
-    debug("construct", config);
+    debug("construct", config, topicRoot);
     this.device = config.device;
     this.ip = config.ip;
     this.mac = config.mac;
     this.state = { startingActivity: null };
     this.client.on("connect", async () => {
       this.client.subscribe(this.topic + "/set/#");
+      this.client.subscribe("harmony/reset/#", (topic, message) => {
+        this.alert("harmony-microservice running");
+//        console.log("topic", topic, "message", message);
+        //        this.exit("harmony-microservice EXIT");
+      });
     });
     this.client.on("message", async (topic, message) => {
       try {
         message = message.toString();
-        debug(this.topic, "topic", topic, "message", message.substr(0, 32));
+        if (message === "__RESTART__") {
+                  this.exit("harmony-microservice EXIT");
+        }
+        console.log(
+          this.topic,
+          "topic",
+          topic,
+          "message",
+          message.substr(0, 32)
+        );
         if (topic.endsWith("command")) {
           return Promise.resolve(await this.command(message));
         } else if (topic.endsWith("activity")) {
@@ -101,7 +115,7 @@ class HarmonyHost extends HostBase {
         this.state = {
           availableCommands: this.availableCommands,
           activities: this.activities,
-          devices: this.devices
+          devices: this.devices,
         };
         //        debug("state", this.state);
         debug("polling");
@@ -133,8 +147,8 @@ class HarmonyHost extends HostBase {
       controlGroup = currentActivity.controlGroup,
       commands = {};
 
-    controlGroup.forEach(group => {
-      group.function.forEach(func => {
+    controlGroup.forEach((group) => {
+      group.function.forEach((func) => {
         commands[func.name] = func;
       });
     });
@@ -221,14 +235,14 @@ class HarmonyHost extends HostBase {
         this.state = {
           isOff: await this.harmonyClient.isOff(),
           currentActivity: currentActivity,
-          startingActivity: newStartingActivity
+          startingActivity: newStartingActivity,
           // availableCommands: this.availableCommands,
           // activities:        this.activities,
           // devices:           this.devices
         };
         if (newActivity) {
           this.state = {
-            commands: this.getCommands() // get commands for current activity
+            commands: this.getCommands(), // get commands for current activity
           };
         }
         // if (!this.once) {
@@ -260,7 +274,7 @@ class HarmonyHost extends HostBase {
     try {
       const records = await this.harmonyClient.getActivities();
       // debug(this.device, 'getActivities', records)
-      records.forEach(activity => {
+      records.forEach((activity) => {
         activities[activity.id] = activity;
       });
       return activities;
@@ -279,7 +293,7 @@ class HarmonyHost extends HostBase {
       slugs = {};
     try {
       const commands = await this.harmonyClient.getAvailableCommands();
-      commands.device.forEach(device => {
+      commands.device.forEach((device) => {
         device.slug = parameterize(device.label);
         device.commands = getCommandsFromControlGroup(device.controlGroup);
         devices[device.id] = device;
@@ -386,7 +400,7 @@ class HarmonyHost extends HostBase {
 const hubs = {};
 
 async function main() {
-  Config.hubs.forEach(hub => {
+  Config.hubs.forEach((hub) => {
     hubs[hub.device] = new HarmonyHost(hub);
   });
 }
