@@ -3,7 +3,7 @@
 process.env.DEBUG = "HarmonyHost";
 
 const debug = require("debug")("HarmonyHost"),
-  Config = require("./config"),
+  //  Config = require("./config"),
   HostBase = require("microservice-core/HostBase"),
   harmony = require("harmonyhubjs-client"),
   parameterize = require("parameterize");
@@ -56,7 +56,7 @@ class HarmonyHost extends HostBase {
       this.client.subscribe(this.topic + "/set/#");
       this.client.subscribe("harmony/reset/#", (topic, message) => {
         this.alert("harmony-microservice running");
-//        console.log("topic", topic, "message", message);
+        //        console.log("topic", topic, "message", message);
         //        this.exit("harmony-microservice EXIT");
       });
     });
@@ -64,7 +64,7 @@ class HarmonyHost extends HostBase {
       try {
         message = message.toString();
         if (message === "__RESTART__") {
-                  this.exit("harmony-microservice EXIT");
+          this.exit("harmony-microservice EXIT");
         }
         console.log(
           this.topic,
@@ -147,11 +147,11 @@ class HarmonyHost extends HostBase {
       controlGroup = currentActivity.controlGroup,
       commands = {};
 
-    controlGroup.forEach((group) => {
+    for (const group of controlGroup) {
       group.function.forEach((func) => {
         commands[func.name] = func;
       });
-    });
+    }
     return commands;
   }
 
@@ -400,9 +400,11 @@ class HarmonyHost extends HostBase {
 const hubs = {};
 
 async function main() {
-  Config.hubs.forEach((hub) => {
+  const Config = await HostBase.config();
+  console.log("Config", Config, Config.harmony);
+  for (const hub of Config.harmony.hubs) {
     hubs[hub.device] = new HarmonyHost(hub);
-  });
+  }
 }
 
 main();
